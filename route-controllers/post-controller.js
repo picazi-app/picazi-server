@@ -18,7 +18,7 @@ exports.fetchPosts = async function(req, res, next) {
         }
       })
     });
-
+    
     // const postsInfoPromises = posts.map(async function(post) {
     //   const comments = await dbOperations.fetchCommentsForPost(post.code);
     //   console.log(comments);
