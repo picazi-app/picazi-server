@@ -59,29 +59,6 @@ exports.fetchSinglePost = async function(req, res, next) {
     const postPromise = dbOperations.fetchSinglePost(req.params.postId);
     const commentPromise = dbOperations.fetchCommentsForPost(req.params.postId);
 
-    // Promise.all([postPromise, commentPromise]).then(results => {
-    //   console.log(results);
-    //   post =   {
-    //     code: results[0].code,
-    //     caption: results[0].caption,
-    //     likes: results[0].likes,
-    //     display_src: results[0].display_src,
-    //     totalComments: results[1].comments
-    //   }
-    //   res.json({post: post})
-      //Output:  
-      // [ { _id: 5d41edab18d76712074fdd36,
-      //   code: 'BAcyDyQwcXX',
-      //   caption: 'Lunch #hamont',
-      //   likes: 56,
-      //   id: '1161022966406956503',
-      //   display_src: 'https://picsum.photos/400/400/?image=11' },
-      // { _id: 5d41db8518d76712074fdcc3,
-      //   postCode: 'BAcyDyQwcXX',
-      //   comments: [ [Object], [Object], [Object], [Object] ] } ]
-    
-    // })
-
     const [post, commentsInfo] = await Promise.all([postPromise, commentPromise]);
 
     if(post === null) {
