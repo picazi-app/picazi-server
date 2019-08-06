@@ -9,10 +9,10 @@ exports.doesEmailExist = async function(req, res, next) {
     const email = req.body.email;
     const user = await dbOperations.fetchUserByEmail(email);
     if(user === null) {
-      res.status(200).json({emailExist: false})
+      res.status(200).json({emailExists: false})
     }
     else {
-      res.status(200).json({emailExist: true})
+      res.status(200).json({emailExists: true})
     } 
   } catch(e) {
       console.log(e)
