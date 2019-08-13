@@ -2,52 +2,55 @@ const User = require('../database/models/user-model')
 const dbOperations = require('../database/db-operations');
 
 exports.fetchPosts = async function(req, res, next) {
-
+  // const session = req.session;
+  console.log("inside fetchPosts");
+  console.log(req.session.user);
   try {
-    const posts = await dbOperations.fetchPosts();
-
-    const postsInfoPromises = posts.map(post => {
-      return dbOperations.fetchCommentsForPost(post.code)
-      .then(results => {
-        return {
-          code: post.code,
-          caption: post.caption,
-          likes: post.likes,
-          display_src: post.display_src,
-          totalComments: results ? results.comments.length : 0
-        }
-      })
-    });
-    
-    // const postsInfoPromises = posts.map(async function(post) {
-    //   const comments = await dbOperations.fetchCommentsForPost(post.code);
-    //   console.log(comments);
-    //   return {
-    //     code: post.code,
-    //     caption: post.caption,
-    //     likes: post.likes,
-    //     display_src: post.display_src,
-    //     totalComments: comments ? comments.length : 0
-    //   }
-    // });
-
-
-    
-    Promise.all(postsInfoPromises).then((results) => {
-      if(results === null) {
-        res.status(200).send('Posts are empty')
+    if(req.session.user) {
+        const posts = await dbOperations.getPosts();
+        const postsInfoPromises = posts.map(post => {
+          return dbOperations.fetchCommentsForPost(post.code)
+          .then(results => {
+            return {
+              code: post.code,
+              caption: post.caption,
+              likes: post.likes,
+              display_src: post.display_src,
+              totalComments: results ? results.comments.length : 0
+            }
+          })
+          .catch((err) => {
+            res.json({
+              msg: "err occured"
+            })
+          })
+        });
+        
+        Promise.all(postsInfoPromises).then((results) => {
+          if(results === null) {
+            res.status(200).send('Posts are empty')
+          }
+          else {
+            res.status(200).json({posts: results})
+          }
+          
+        }).catch(e => {
+          console.log("error inside promise all", e);
+          res.status(500).json({
+            msg: "catch error"
+          })
+        });
       }
-      else {
-        res.status(200).json({posts: results})
+      else  {
+        res.status(401).json({
+          msg: "user unlogged"
+        });
       }
-      
-    }).catch(e => {
-      console.log(e);
-    });
   }
   catch(e) {
-    console.log(e)
-    res.status(500).send('Server Error.')
+    console.log(e);
+    // throw new Error('Inside catch block. not sure what happening');
+    res.status(500).send({msg: 'Server Error.'})
   };
 }
 

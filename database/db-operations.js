@@ -25,9 +25,10 @@ exports.regSaveUser = function(email, username, firstName, password) {
 
 // Fetch Posts
 
-exports.fetchPosts = function() {
-  return Post.find({}).exec()
-
+exports.getPosts = function() {
+  return Post.find({})
+  .exec()
+  .catch((err) => console.log("err occured in fetchUserByEmail", err))
 }
 
 exports.fetchSinglePost = function(code) {

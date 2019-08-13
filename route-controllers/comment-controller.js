@@ -12,7 +12,6 @@ exports.fetchCommentsForPost= async function(req, res, next) {
       res.status(200).json({comments: comments})
     } 
   } catch(e) {
-      console.log(e)
       res.status(500).send('Server Error.')
   };
 
