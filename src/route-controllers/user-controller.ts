@@ -1,3 +1,4 @@
+export {};
 const User = require('../database/models/user-model')
 const dbOperations = require('../database/db-operations');
 const Validator = require('validator');
@@ -5,43 +6,43 @@ const isEmpty =  require('lodash/isEmpty');
 const bcrypt = require('bcrypt');
 
 
-exports.doesEmailExist = async function(req, res, next) {
-  try {
-    const email = req.body.email;
-    const user = await dbOperations.fetchUserByEmail(email);
-    if(user === null) {
-      res.status(200).json({emailExists: false})
-    }
-    else {
-      res.status(200).json({emailExists: true})
-    } 
-  } catch(e) {
-      res.status(500).send('Server Error.')
-  };
+// exports.doesEmailExist = async function(req, res, next) {
+//   try {
+//     const email = req.body.email;
+//     const user = await dbOperations.fetchUserByEmail(email);
+//     if(user === null) {
+//       res.status(200).json({emailExists: false})
+//     }
+//     else {
+//       res.status(200).json({emailExists: true})
+//     } 
+//   } catch(e) {
+//       res.status(500).send('Server Error.')
+//   };
   
-};
+// };
 
 
-exports.registerUser = async function(req, res, next) {
-  try {
-      const email = req.body.email;
-      const username = req.body.username;
-      const firstName = req.body.firstName;
-      let password = req.body.password;
+// exports.registerUser = async function(req, res, next) {
+//   try {
+//       const email = req.body.email;
+//       const username = req.body.username;
+//       const firstName = req.body.firstName;
+//       let password = req.body.password;
 
-      let hash = bcrypt.hashSync(password, 10)
+//       let hash = bcrypt.hashSync(password, 10)
 
-      const user = await dbOperations.regSaveUser(email, username, firstName, hash);
-      if(!user) { 
-        res.status(500).json({msg: "Couldn't save user data"})
-      }
-      else {
-        res.status(200).json({msg: "Success"})
-      } 
-  }catch(e) {
-      res.status(500).send('Server Error.')
-  }
-}
+//       const user = await dbOperations.regSaveUser(email, username, firstName, hash);
+//       if(!user) { 
+//         res.status(500).json({msg: "Couldn't save user data"})
+//       }
+//       else {
+//         res.status(200).json({msg: "Success"})
+//       } 
+//   }catch(e) {
+//       res.status(500).send('Server Error.')
+//   }
+// }
 
 // function validateInput(data) {
 //   let errors = {};
