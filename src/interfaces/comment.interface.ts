@@ -1,5 +1,5 @@
 interface Comments {
-  postCode: string;
+  postId: number;
   comments: SingleComment[];
 }
 

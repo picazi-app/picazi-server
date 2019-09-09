@@ -1,5 +1,5 @@
 // export {};
-import * as mongoose from 'mongoose';
+  import * as mongoose from 'mongoose';
 import Comment from '../interfaces/comment.interface';
 
 /**
@@ -8,7 +8,7 @@ import Comment from '../interfaces/comment.interface';
  */
 
  let CommentsSchema = new mongoose.Schema({
-   postCode: {type: String, required: true},
+   postId: {type:  mongoose.Schema.Types.ObjectId, required: true},
    comments: [
     {
       text: { type: String, required: true },
@@ -17,5 +17,8 @@ import Comment from '../interfaces/comment.interface';
   ]
 
  })
+
+ CommentsSchema.index({"postId": 1});
+
 
  module.exports = mongoose.model<Comment & mongoose.Document>('Comment', CommentsSchema);

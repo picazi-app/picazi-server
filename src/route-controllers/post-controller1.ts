@@ -2,11 +2,7 @@ import * as express from 'express';
 const dbOperations = require('../database/db-operations');
 import Post from '../interfaces/post.interface'
 import Comment from '../interfaces/comment.interface';
-// router.get('/', postController.fetchPosts)
 
-// router.get('/:postId', postController.fetchSinglePost)
-
-// router.get('/:postId/comments', commentController.fetchCommentsForPost)
 class PostController {
   public path = '/posts';
   public router = express.Router();
@@ -29,10 +25,10 @@ class PostController {
     if(req.session.user) {
         const posts = await dbOperations.getPosts();
         const postsInfoPromises = posts.map((post: Post) => {
-          return dbOperations.fetchCommentsForPost(post.code)
+          return dbOperations.fetchCommentsForPost(post._id)
           .then((results: Comment)=> {
             return {
-              code: post.code,
+              _id: post._id,
               caption: post.caption,
               likes: post.likes,
               display_src: post.display_src,
@@ -87,7 +83,7 @@ class PostController {
       }
       else {
         const postInfo = {
-          code: post.code,
+          _id: post._id,
           caption: post.caption,
           likes: post.likes,
           display_src: post.display_src,
