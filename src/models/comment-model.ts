@@ -18,7 +18,7 @@ import Comment from '../interfaces/comment.interface';
 
  })
 
- CommentsSchema.index({"postId": 1});
+//  CommentsSchema.index({"postId": 1});
 
 
  module.exports = mongoose.model<Comment & mongoose.Document>('Comment', CommentsSchema);

@@ -50,10 +50,6 @@ class App {
     this.app.use(express.static(path.join(__dirname, 'public')));
     this.app.use(bodyParser.json());
     
-   
-    
-    
-
     let sessionStore = new RedisStore({
       port: 6379,
       db: 2,
@@ -101,7 +97,7 @@ class App {
     })
   }
 
-//Connect to database
+  //Connect to database
   private connectToTheDatabase() {
     let dbURL = 'mongodb://localhost:27017/reduxtagram-server';
     const { MONGODB_URL } = process.env
