@@ -12,8 +12,8 @@ class UserController {
   }
 
   private initializeRoutes() {
-    this.router.post('/email/check', this.doesEmailExist);
-    this.router.post('/email/register', this.registerUser);
+    this.router.post(`${this.path}/email/check`, this.doesEmailExist);
+    this.router.post(`${this.path}/email/register`, this.registerUser);
   }
 
   private doesEmailExist = async (req: express.Request, res: express.Response, next: NextFunction) => {
@@ -37,7 +37,6 @@ class UserController {
       const username = req.body.username;
       const firstName = req.body.firstName;
       let password = req.body.password;
-
       let hash = bcrypt.hashSync(password, 10)
 
       const user = await dbOperations.regSaveUser(email, username, firstName, hash);
@@ -47,9 +46,9 @@ class UserController {
       else {
         res.status(200).json({msg: "Success"})
       } 
-  }catch(e) {
-      res.status(500).send('Server Error.')
-  }
+      }catch(e) {
+          res.status(500).send('Server Error.')
+      }
   }
 }
 
