@@ -24,6 +24,19 @@ exports.regSaveUser = function(email: string, username: string, firstName: strin
   .catch((err: any) => console.log("err occured in regSaveUser ", err))
 
 }
+// Increment the like counter
+
+exports.incrementLikes = function(postId: string, likes: number) {
+  // const id = request.params.id;
+  //   const postData: Post = request.body;
+  return Post.findByIdAndUpdate(
+    {_id: ObjectId(postId)}, 
+    { $inc: { likes: 1 }},
+    {new: true},
+  )
+  .exec()
+  .catch((err: any) => console.log("err occured inside in INCREEMENT_LIKES ", err) )
+}
 
 // Fetch Posts
 
@@ -34,8 +47,9 @@ exports.getPosts = function() {
 }
 
 exports.fetchSinglePost = function(id: string) {
-  return Post.findOne({_id: id}).exec()
-
+  return Post.findOne({
+    _id: ObjectId(id)
+  }).exec()
 }
 
 // Fetch Comments

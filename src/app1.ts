@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 import cookieParser from 'cookie-parser';
 import Controller from './interfaces/controller.interface';
+import HttpException from './exceptions/HttpException';
 const cors = require('cors');
 const logger = require('morgan');
 const session = require('express-session');
@@ -22,13 +23,7 @@ class App {
     this.connectToTheDatabase();
     this.initializeMiddlewares();
     this.initializeControllers(controllers);
-    // this.initializeErrorHandling();
-  }
-
-  public listen() {
-    this.app.listen(process.env.PORT, () => {
-      console.log(`App listening on the port ${process.env.PORT}`);
-    })
+    this.initializeErrorHandling();
   }
 
   private initializeMiddlewares() {
@@ -77,24 +72,58 @@ class App {
     // });
 
     // error handler
-    this.app.use(function(err:any, req: Request, res: Response, next: NextFunction) {
-      // res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-      // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-      next();
-      // set locals, only providing error in development
-      res.locals.message = err.message;
-      res.locals.error = req.app.get('env') === 'development' ? err : {};
+    // this.app.use(function(err:any, req: Request, res: Response, next: NextFunction) {
+    //   // res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    //   // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    //   // next();
+    //   console.log("error handleer.......................................................")
+    //   // set locals, only providing error in development
+    //   res.locals.message = err.message;
+    //   res.locals.error = req.app.get('env') === 'development' ? err : {};
     
-      // render the error page
-      res.status(err.status || 500);
-      res.render('error');
-    });
+    //   // render the error page
+    //   res.status(err.status || 500)
+    //   // res.render('error');
+    // });
+    
   }
-  
+ 
+  public listen() {
+    this.app.listen(process.env.PORT, () => {
+      console.log(`App listening on the port ${process.env.PORT}`);
+    })
+  }
+
   private initializeControllers(controllers: Controller[]) {
     controllers.forEach(controller => {
       this.app.use('/', controller.router)
     })
+  }
+
+  private initializeErrorHandling() {
+    this.app.use(function(error:HttpException, req: Request, res: Response, next: NextFunction) {
+      // res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+      // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      // next();
+      // console.log("error handleer.......................................................", error)
+      // // set locals, only providing error in development
+      // res.locals.message = error.message;
+      // res.locals.error = req.app.get('env') === 'development' ? error : {};
+    
+      // // render the error page
+      // res.status(error.status || 500).send(error.message)
+      // res.render('error');
+
+      const status = error.status || 500;
+      const message = error.message || 'Something went wrong';
+      res
+        .status(status)
+        .send({
+          status,
+          message,
+        })
+    });
+    
   }
 
   //Connect to database
@@ -110,6 +139,8 @@ class App {
       }
     })
   }
+
+
 }
 
 export default App;

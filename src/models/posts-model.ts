@@ -10,7 +10,7 @@ import Post from '../interfaces/post.interface'
 
  let postSchema = new mongoose.Schema({
   caption: { type: String, required: true },
-  likes: Number,
+  likes: { type: Number, default:0},
   display_src: { type: String, required: true },
  })
 
