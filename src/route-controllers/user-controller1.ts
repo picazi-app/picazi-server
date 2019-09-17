@@ -1,5 +1,6 @@
 import * as express from 'express';
 import { NextFunction } from 'connect';
+import UserWithThatEmailAlreadyExistsException from '../exceptions/UserWithThatEmailAlreadyExistsException';
 const dbOperations = require('../database/db-operations');
 const bcrypt = require('bcrypt');
 
@@ -12,8 +13,8 @@ class UserController {
   }
 
   private initializeRoutes() {
-    this.router.post('/email/check', this.doesEmailExist);
-    this.router.post('/email/register', this.registerUser);
+    this.router.post(`${this.path}/email/check`, this.doesEmailExist);
+    this.router.post(`${this.path}/email/register`, this.registerUser);
   }
 
   private doesEmailExist = async (req: express.Request, res: express.Response, next: NextFunction) => {
@@ -21,10 +22,12 @@ class UserController {
       const email = req.body.email;
       const user = await dbOperations.fetchUserByEmail(email);
       if(user === null) {
-        res.status(200).json({emailExists: false})
+        res.status(200).json({message: 'false'})
+        // next(new UserWithThatEmailAlreadyExistsException(email))
       }
       else {
-        res.status(200).json({emailExists: true})
+        // res.status(200).json({emailExists: true})
+        next(new UserWithThatEmailAlreadyExistsException('true'))
       } 
     } catch(e) {
         res.status(500).send('Server Error.')
@@ -37,7 +40,6 @@ class UserController {
       const username = req.body.username;
       const firstName = req.body.firstName;
       let password = req.body.password;
-
       let hash = bcrypt.hashSync(password, 10)
 
       const user = await dbOperations.regSaveUser(email, username, firstName, hash);
@@ -47,9 +49,9 @@ class UserController {
       else {
         res.status(200).json({msg: "Success"})
       } 
-  }catch(e) {
-      res.status(500).send('Server Error.')
-  }
+      }catch(e) {
+          res.status(500).send('Server Error.')
+      }
   }
 }
 

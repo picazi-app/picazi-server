@@ -1,5 +1,5 @@
  interface Post {
-  code: string;
+  _id: string;
   caption: string;
   likes: number;
   display_src: string;

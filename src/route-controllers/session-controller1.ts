@@ -1,4 +1,5 @@
 import * as express from 'express';
+import InvalidCredentialsException from '../exceptions/InvalidCredentialsException';
 const dbOperations = require('../database/db-operations');
 const bcrypt = require('bcrypt');
 
@@ -11,25 +12,25 @@ class SessionController {
   }
 
   private initializeRoutes() {
-    this.router.post(`${this.path}`, this.loginUser);
-    this.router.get(`${this.path}`, this.getUserSession);
+    this.router.post(`${this.path}/login`, this.loginUser);
+    this.router.get(`${this.path}/saveSession`, this.getUserSession);
     this.router.delete(`${this.path}/delete`, this.deleteUserSession);
   }
 
   private sessionizeUser = (user:any) => {
     return { firstName: user.firstName, username: user.username, email: user.email};
   }
-  private loginUser = async (req: any, res: express.Response) => {
-    console.log("loginUser.........", req.body.email)
+  private loginUser = async (req: any, res: express.Response, next: express.NextFunction) => {
+    // console.log("loginUser.........", req.body.email)
     const email = req.body.email;
     const password = req.body.password;
   
   const user = await dbOperations.fetchUserByEmail(email);
   try {
     if(user) {
-      console.log("login user", user) 
+      // console.log("login user", user) 
       const match = await bcrypt.compare(password, user.password);
-      console.log("match is", match)
+      // console.log("match is", match)
       if(match) {
         req.session.user = {
           email: email,
@@ -44,31 +45,34 @@ class SessionController {
         });
       }
       else {
-        res.status(401).send({
-          error: {
-            code: "INVALID_CREDENTIALS",
-            msg: "Password is incorrect"
-          }
-        });
+        // res.status(401).send({
+        //   error: {
+        //     code: "INVALID_CREDENTIALS",
+        //     msg: "Password is incorrect"
+        //   }
+        // });
+          next(new InvalidCredentialsException())
       }
     } 
     else {
-      res.status(401).send({
-        error: {
-          code: "INVALID_CREDENTIALS",
-          msg: "Email/password is incorrect"
-        }
-      });
+      // res.status(401).send({
+      //   error: {
+      //     code: "INVALID_CREDENTIALS",
+      //     msg: "Email/password is incorrect"
+      //   }
+      // });
+        next(new InvalidCredentialsException())
     }
   } catch(e) {
       console.log("error inside login catch")
-      res.status(500).send({
-        error: {
-          code: "INVALID_CREDENTIALS",
-          msg: "Server error."
-        }
-      });
-      throw e;
+      // res.status(500).send({
+      //   error: {
+      //     code: "INVALID_CREDENTIALS",
+      //     msg: "Server error."
+      //   }
+      // });
+      next(e)
+      
     }
     
   }
