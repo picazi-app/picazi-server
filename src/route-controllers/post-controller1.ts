@@ -1,10 +1,12 @@
 import * as express from 'express';
 const dbOperations = require('../database/db-operations');
 import Post from '../interfaces/post.interface'
-import Comment from '../interfaces/comment.interface';
+import CommentInterface from '../interfaces/comment.interface';
 import PostNotFoundException from '../exceptions/PostNotFoundException';
 import NotAuthorizedException from '../exceptions/NotAuthorizedException';
 import { NextFunction } from 'connect';
+const Comment = require('../models/comment-model');
+
 var ObjectId = require('mongodb').ObjectID
 
 class PostController {
@@ -25,13 +27,12 @@ class PostController {
 
   private fetchPosts = async (req: any, res: express.Response, next: express.NextFunction) => {
     // console.log("inside fetchPosts");
-    // console.log("req.session.user", req.session.user);
   try {
     if(req.session.user) {
         const posts = await dbOperations.getPosts();
         const postsInfoPromises = posts.map((post: Post) => {
           return dbOperations.fetchCommentsForPost(post._id)
-          .then((results: Comment)=> {
+          .then((results: CommentInterface)=> {
             return {
               _id: post._id,
               caption: post.caption,
@@ -121,7 +122,6 @@ class PostController {
   }
 
   private incrementLikes = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.log("req.params.postId inside incrementLikes", req.params.postId)
     if(ObjectId.isValid(req.params.postId)) {
       const postId = req.body.postId;
       const likes = req.body.likes;
@@ -138,16 +138,18 @@ class PostController {
 
   private fetchCommentsForPost = async (req: express.Request, res: express.Response, next: NextFunction) => {
     try {
-      if(ObjectId.isValid(req.params.postId)){
-        const comments = await dbOperations.fetchCommentsForPost(req.params.postId);
-        // console.log("comments", comments)
+      const id = req.params.postId;
+      if(ObjectId.isValid(id)){
+        let comments = await dbOperations.fetchCommentsForPost(id);
+        console.log("comments", comments)
         if(comments === null) {
-          // res.status(200).send('There are no comments for this post')
-          res.status(200).json({ comments: []})
+          comments = new Comment({
+            postId: id,
+            comments: []
+          })
         }
-        else {
-          res.status(200).json({ comments: comments})
-        } 
+
+        res.status(200).json({ comments: comments})
       }
       else {
         next(new PostNotFoundException(req.params.postId))

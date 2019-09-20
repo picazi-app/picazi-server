@@ -10,12 +10,12 @@ import Comment from '../interfaces/comment.interface';
  let CommentsSchema = new mongoose.Schema({
    postId: {type:  mongoose.Schema.Types.ObjectId, required: true},
    comments: [
-    {
-      text: { type: String, required: true },
-      user: { type: String,  required: true}
-    }
-  ]
-
+      {
+        text: { type: String, required: true },
+        user: { type: String,  required: true}
+      }
+    ],
+    createdAt: { type: Date, default: Date.now, required: true},
  })
 
 //  CommentsSchema.index({"postId": 1});

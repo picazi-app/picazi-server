@@ -32,14 +32,14 @@ class App {
       credentials: true,
       origin: "http://localhost:3000"
     }));
-
+    
+    this.app.use(express.json());
     // view engine setup
     this.app.set('views', path.join(__dirname, 'views'));
     this.app.set('view engine', 'jade');
 
     this.app.use(logger('dev'));
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: false }));
+    this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
 
     this.app.use(express.static(path.join(__dirname, 'public')));
@@ -89,7 +89,7 @@ class App {
   }
  
   public listen() {
-    this.app.listen(process.env.PORT, () => {
+    this.app.listen(4000, () => {
       console.log(`App listening on the port ${process.env.PORT}`);
     })
   }
@@ -102,17 +102,6 @@ class App {
 
   private initializeErrorHandling() {
     this.app.use(function(error:HttpException, req: Request, res: Response, next: NextFunction) {
-      // res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-      // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-      // next();
-      // console.log("error handleer.......................................................", error)
-      // // set locals, only providing error in development
-      // res.locals.message = error.message;
-      // res.locals.error = req.app.get('env') === 'development' ? error : {};
-    
-      // // render the error page
-      // res.status(error.status || 500).send(error.message)
-      // res.render('error');
 
       const status = error.status || 500;
       const message = error.message || 'Something went wrong';
