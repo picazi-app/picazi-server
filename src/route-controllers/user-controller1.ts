@@ -1,6 +1,7 @@
 import * as express from 'express';
 import { NextFunction } from 'connect';
 import UserWithThatEmailAlreadyExistsException from '../exceptions/UserWithThatEmailAlreadyExistsException';
+import ThisUserNameExistsException from '../exceptions/ThisUserNameExistsException';
 const dbOperations = require('../database/db-operations');
 const bcrypt = require('bcrypt');
 
@@ -15,6 +16,7 @@ class UserController {
   private initializeRoutes() {
     this.router.post(`${this.path}/email/check`, this.doesEmailExist);
     this.router.post(`${this.path}/email/register`, this.registerUser);
+    this.router.post(`${this.path}/username/check`, this.doesUserNameExist);
   }
 
   private doesEmailExist = async (req: express.Request, res: express.Response, next: NextFunction) => {
@@ -28,6 +30,21 @@ class UserController {
       else {
         // res.status(200).json({emailExists: true})
         next(new UserWithThatEmailAlreadyExistsException('true'))
+      } 
+    } catch(e) {
+        res.status(500).send('Server Error.')
+    };
+  }
+
+  private doesUserNameExist = async (req: express.Request, res: express.Response, next: NextFunction) => {
+    try {
+      const username = req.body.username;
+      const user = await dbOperations.fetchUserByUserName(username);
+      if(user === null) {
+        res.status(200).json({message: 'false'})
+      }
+      else {
+        next(new ThisUserNameExistsException('true'))
       } 
     } catch(e) {
         res.status(500).send('Server Error.')

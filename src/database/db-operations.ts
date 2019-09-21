@@ -1,3 +1,5 @@
+import comments from "./sample-comments";
+
 export {};
 const User = require('../models/user-model');
 const Post = require('../models/posts-model');
@@ -12,7 +14,14 @@ exports.fetchUserByEmail = function(email: string) {
   .catch((err: any) => console.log("err occured in fetchUserByEmail", err))
 }
 
-// Save user info at the time of registration
+exports.fetchUserByUserName = function(username: string) {
+  return User.findOne({
+    username: username
+  })
+  .exec()
+  .catch((err: any) => console.log("err occured in fetchUserByUserName", err))
+}
+
 exports.regSaveUser = function(email: string, username: string, firstName: string, password: string) {
   const user = new User({
     firstName: firstName, 
@@ -24,13 +33,10 @@ exports.regSaveUser = function(email: string, username: string, firstName: strin
   .catch((err: any) => console.log("err occured in regSaveUser ", err))
 
 }
-// Increment the like counter
 
 exports.incrementLikes = function(postId: string, likes: number) {
-  // const id = request.params.id;
-  //   const postData: Post = request.body;
   return Post.findByIdAndUpdate(
-    {_id: ObjectId(postId)}, 
+    postId, 
     { $inc: { likes: 1 }},
     {new: true},
   )
@@ -38,6 +44,23 @@ exports.incrementLikes = function(postId: string, likes: number) {
   .catch((err: any) => console.log("err occured inside in INCREEMENT_LIKES ", err) )
 }
 
+exports.saveComment = function(postId: string, comment: string, username: string) {
+  console.log(postId, comment, username);
+  return Comment.findOneAndUpdate(
+    {postId: ObjectId(postId)},
+    {
+      $push: { 
+         comments: { 
+          text: comment,
+          username: username
+         }
+      }
+    },  
+    {new: true},
+  )
+  .exec()
+  .catch((err: any) => console.log("err occured inside in saveComment operation ", err) )
+}
 // Fetch Posts
 
 exports.getPosts = function() {

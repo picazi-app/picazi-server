@@ -11,8 +11,9 @@ import Comment from '../interfaces/comment.interface';
    postId: {type:  mongoose.Schema.Types.ObjectId, required: true},
    comments: [
       {
+        _id: false,
         text: { type: String, required: true },
-        user: { type: String,  required: true}
+        username: { type: String,  required: true, unique: true}
       }
     ],
     createdAt: { type: Date, default: Date.now, required: true},

@@ -5,6 +5,7 @@ import CommentInterface from '../interfaces/comment.interface';
 import PostNotFoundException from '../exceptions/PostNotFoundException';
 import NotAuthorizedException from '../exceptions/NotAuthorizedException';
 import { NextFunction } from 'connect';
+import comments from '../database/sample-comments';
 const Comment = require('../models/comment-model');
 
 var ObjectId = require('mongodb').ObjectID
@@ -12,7 +13,6 @@ var ObjectId = require('mongodb').ObjectID
 class PostController {
   public path = '/posts';
   public router = express.Router();
-  // private post = postModel
 
   constructor() {
     this.initializeRouters();
@@ -22,6 +22,7 @@ class PostController {
     this.router.get(`${this.path}`, this.fetchPosts)
     this.router.get(`${this.path}/:postId`, this.fetchSinglePost)
     this.router.get(`${this.path}/:postId/comments`, this.fetchCommentsForPost)
+    this.router.post(`${this.path}/:postId/comments`, this.saveCommentForPost)
     this.router.patch(`${this.path}/:postId/likes`, this.incrementLikes)
   }
 
@@ -141,7 +142,6 @@ class PostController {
       const id = req.params.postId;
       if(ObjectId.isValid(id)){
         let comments = await dbOperations.fetchCommentsForPost(id);
-        console.log("comments", comments)
         if(comments === null) {
           comments = new Comment({
             postId: id,
@@ -159,6 +159,54 @@ class PostController {
         next(e)
     };
   }
+
+  private saveCommentForPost = async (req: any, res: express.Response, next: NextFunction) => {
+    try {
+      if(req.session.user) {
+        const postId = req.params.postId;
+
+        if(ObjectId.isValid(postId)){ 
+          const email = req.session.user.email;
+          const comment = req.body.comment;
+
+          const user = await dbOperations.fetchUserByEmail(email);
+          const fetchComments = await dbOperations.fetchCommentsForPost(postId);
+          
+          if(fetchComments) {
+              const commentsInfo = await dbOperations.saveComment(postId, comment, user.username)
+              console.log(commentsInfo)
+
+              res.status(200).json({
+                comments: commentsInfo.comments
+              });
+          
+          }else {
+            const commentsInfo = new Comment({
+              postId: postId,
+              comments: [{
+                text: comment,
+                username: user.username
+              }]
+            });
+
+            commentsInfo.save().then(() => {
+              res.status(200).json({
+                comment: commentsInfo.comments
+              })
+            }).catch((err: any) => {
+              console.log(err)
+            })
+          }
+          
+        }
+      }else {
+        next(new NotAuthorizedException())
+      }
+    }catch(e){
+        next(e)
+    }
+  }
+
 }
 
 export default PostController;
