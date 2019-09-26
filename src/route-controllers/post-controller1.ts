@@ -21,25 +21,27 @@ class PostController {
   private initializeRouters() {
     this.router.get(`${this.path}`, this.fetchPosts)
     this.router.get(`${this.path}/:postId`, this.fetchSinglePost)
-    this.router.get(`${this.path}/:postId/comments`, this.fetchCommentsForPost)
+    this.router.get(`${this.path}/:postId/comments`, this.getCommentsForPost)
     this.router.post(`${this.path}/:postId/comments`, this.saveCommentForPost)
+    this.router.delete(`${this.path}/:postId/comments`, this.removeCommentForPost)
     this.router.patch(`${this.path}/:postId/likes`, this.incrementLikes)
   }
 
   private fetchPosts = async (req: any, res: express.Response, next: express.NextFunction) => {
-    // console.log("inside fetchPosts");
   try {
     if(req.session.user) {
         const posts = await dbOperations.getPosts();
+        const comments = await dbOperations.fetchCommentsForPost(ObjectId("5d728e52cd08f069943317f5"))
+        
         const postsInfoPromises = posts.map((post: Post) => {
           return dbOperations.fetchCommentsForPost(post._id)
-          .then((results: CommentInterface)=> {
+          .then((results: any)=> {
             return {
               _id: post._id,
               caption: post.caption,
               likes: post.likes,
               display_src: post.display_src,
-              totalComments: results ? results.comments.length : 0
+              totalComments: results ? results.length : 0
             }
           })
           .catch((err:any) => {
@@ -59,17 +61,10 @@ class PostController {
           }
           
         }).catch(e => {
-          // console.log("error inside promise all", e);
-          // res.status(500).json({
-          //   msg: "catch error"
-          // })
           next(e)
         });
       }
       else  {
-        // res.status(401).json({
-        //   msg: "user unlogged"
-        // });
         next(new NotAuthorizedException())
       }
     }
@@ -83,9 +78,7 @@ class PostController {
 
   private fetchSinglePost = async (req:express.Request, res: express.Response, next: express.NextFunction) => {
     try {
-      // console.log("fetch single posts...........")
         if(!ObjectId.isValid(req.params.postId)){
-          // res.status(404).send("No record exist")
           next(new PostNotFoundException(req.params.postId))
         }
         else {
@@ -93,10 +86,7 @@ class PostController {
           const commentPromise = dbOperations.fetchCommentsForPost(req.params.postId);
       
           const [post, commentsInfo] = await Promise.all([postPromise, commentPromise]);
-          // console.log("post...................", post)
           if(post === null) {
-            // res.status(200).send('There is no post with this Id')
-            
               next(new PostNotFoundException(req.params.postId))
 
           }
@@ -106,7 +96,7 @@ class PostController {
               caption: post.caption,
               likes: post.likes,
               display_src: post.display_src,
-              totalComments: commentsInfo ? commentsInfo.comments.length : 0
+              totalComments: commentsInfo ? commentsInfo.length : 0
             }
             res.status(200).json({
               post: postInfo
@@ -116,7 +106,6 @@ class PostController {
     } 
     catch(e) {
         console.log("e..................", e)
-        // res.status(500).send('Server Error.')
         // next(new PostNotFoundException(req.params.postId))
         next(e)
     };
@@ -133,22 +122,14 @@ class PostController {
       else {
         next(new PostNotFoundException(req.params.postId))
       }
-      // console.log("After increment the likes", post)
     } 
   }
 
-  private fetchCommentsForPost = async (req: express.Request, res: express.Response, next: NextFunction) => {
+  private getCommentsForPost = async (req: express.Request, res: express.Response, next: NextFunction) => {
     try {
       const id = req.params.postId;
       if(ObjectId.isValid(id)){
         let comments = await dbOperations.fetchCommentsForPost(id);
-        if(comments === null) {
-          comments = new Comment({
-            postId: id,
-            comments: []
-          })
-        }
-
         res.status(200).json({ comments: comments})
       }
       else {
@@ -170,33 +151,46 @@ class PostController {
           const comment = req.body.comment;
 
           const user = await dbOperations.fetchUserByEmail(email);
+
+          const commentToSave = await dbOperations.saveComment(postId, comment, user.username);
           const fetchComments = await dbOperations.fetchCommentsForPost(postId);
+          console.log(fetchComments)
+      
           
-          if(fetchComments) {
-              const commentsInfo = await dbOperations.saveComment(postId, comment, user.username)
-              console.log(commentsInfo)
-
-              res.status(200).json({
-                comments: commentsInfo.comments
-              });
+          res.status(200).json({
+            comments: fetchComments
+          })
+        
           
-          }else {
-            const commentsInfo = new Comment({
-              postId: postId,
-              comments: [{
-                text: comment,
-                username: user.username
-              }]
-            });
+          // if(fetchComments) {
+          //     const commentsInfo = await dbOperations.saveComment(postId, comment, user.username)
+          //     console.log(commentsInfo)
 
-            commentsInfo.save().then(() => {
-              res.status(200).json({
-                comment: commentsInfo.comments
-              })
-            }).catch((err: any) => {
-              console.log(err)
-            })
-          }
+          //     res.status(200).json({
+          //       // comments: commentsInfo.comments
+          //       comments: commentsInfo
+          //     });
+          
+          // }
+          // else {
+          //   const commentsInfo = new Comment({
+          //     postId: postId,
+          //     // comments: [{
+          //     //   text: comment,
+          //     //   username: user.username
+          //     // }]
+          //     text: comment,
+          //     username: user.username
+          //   });
+
+          //   commentsInfo.save().then(() => {
+          //     res.status(200).json({
+          //       comment: commentsInfo
+          //     })
+          //   }).catch((err: any) => {
+          //     console.log(err)
+          //   })
+          // }
           
         }
       }else {
@@ -205,6 +199,36 @@ class PostController {
     }catch(e){
         next(e)
     }
+  }
+
+  private removeCommentForPost = async (req: any, res: express.Response, next: express.NextFunction) => {
+
+    try {
+      if(req.session.user) {
+        const postId = req.params.postId;
+
+        if(ObjectId.isValid(postId)){ 
+          const email = req.session.user.email;
+          const commentId = req.body.commentId;
+
+          const user = await dbOperations.fetchUserByEmail(email);
+
+          const commentToRemove = await dbOperations.removeComment(commentId)
+          const fetchComments = await dbOperations.fetchCommentsForPost(postId);
+          console.log("commentToRemove is ", commentToRemove)
+      
+          
+          res.status(200).json({
+            comments: fetchComments
+          })
+        }
+      }else {
+        next(new NotAuthorizedException())
+      }
+    }catch(e){
+        next(e)
+    }
+
   }
 
 }

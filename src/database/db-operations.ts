@@ -44,25 +44,6 @@ exports.incrementLikes = function(postId: string, likes: number) {
   .catch((err: any) => console.log("err occured inside in INCREEMENT_LIKES ", err) )
 }
 
-exports.saveComment = function(postId: string, comment: string, username: string) {
-  console.log(postId, comment, username);
-  return Comment.findOneAndUpdate(
-    {postId: ObjectId(postId)},
-    {
-      $push: { 
-         comments: { 
-          text: comment,
-          username: username
-         }
-      }
-    },  
-    {new: true},
-  )
-  .exec()
-  .catch((err: any) => console.log("err occured inside in saveComment operation ", err) )
-}
-// Fetch Posts
-
 exports.getPosts = function() {
   return Post.find({})
   .exec()
@@ -78,7 +59,71 @@ exports.fetchSinglePost = function(id: string) {
 // Fetch Comments
 
 exports.fetchCommentsForPost = function(postId: string) {
-  return Comment.findOne({
+  return Comment.find({
     postId: new ObjectId(postId)
   }).exec()
 }
+
+exports.saveComment = function(postId: string, comment: string, username: string) {
+  const comments = new Comment({
+    postId: new ObjectId(postId), 
+    text: comment,
+    username: username
+  })
+  return comments.save()
+  .catch((err: any) => console.log("err occured inside in saveComment operation ", err) )
+}
+
+exports.removeComment = function(id: string) {
+  console.log("id", id);
+  return Comment.deleteOne({
+    _id: id
+  })
+  .catch((err: any) => console.log("err occured inside in removeComment", err))
+
+}
+
+// exports.saveComment = function(postId: string, comment: string, username: string) {
+  //   console.log(postId, comment, username);
+  //   return Comment.findOneAndUpdate(
+  //     {postId: ObjectId(postId)},
+  //     {
+  //       $push: { 
+  //          comments: { 
+  //           text: comment,
+  //           username: username
+  //          }
+  //       }
+  //     },  
+  //     {new: true},
+  //   )
+  //   .exec()
+  //   .catch((err: any) => console.log("err occured inside in saveComment operation ", err) )
+  // }
+  // Fetch Posts
+//OLD Schema values 
+
+// {
+// 	"_id" : ObjectId("5d8680ad41cb627c17d0f557"),
+// 	"postId" : ObjectId("5d728e52cd08f069943317f5"),
+// 	"comments" : [
+// 		{
+// 			"text" : "llllllllll",
+// 			"username" : "puri"
+// 		},
+// 		{
+// 			"text" : "lllllllllllll",
+// 			"username" : "puri"
+// 		},
+// 		{
+// 			"text" : "lllllllllllllllllllllllllllllllllllllllllllllllll",
+// 			"username" : "puri"
+// 		},
+// 		{
+// 			"text" : "purnima",
+// 			"username" : "puri"
+// 		}
+// 	],
+// 	"createdAt" : ISODate("2019-09-21T19:57:33.411Z"),
+// 	"__v" : 0
+// }
