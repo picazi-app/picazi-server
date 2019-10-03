@@ -1,0 +1,40 @@
+version: "3"
+services:
+  reduxtagram-server:
+    container_name: reduxtagram-server-container
+    image: reduxtagram-server-image
+    restart: always
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - MONGOIP=mongo
+      - REDISIP=redis
+    depends_on:
+      - mongo
+      - redis
+  reduxtagram-client:
+    container_name: my-reduxtagram-container
+    image: my-reduxtagram-image
+    restart: always
+    build: .
+    ports:
+      - "3000:3000"
+
+  mongo:
+    container_name: mongo
+    restart: always
+    image: mongo
+    volumes:
+      - ./data/mongodb:/data/db
+    ports:
+      - "27017:27017"
+
+  redis:
+    container_name: redis
+    image: redis
+    volumes:
+      - ./data/redis:/data/db
+    ports:
+      - "6379:6379"
