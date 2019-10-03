@@ -11,7 +11,6 @@ const cors = require('cors');
 const logger = require('morgan');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
-const createError = require('http-errors');
 
 // import errorMiddleware from './middleware/error.middleware';
 
@@ -46,6 +45,7 @@ class App {
     this.app.use(bodyParser.json());
     
     let sessionStore = new RedisStore({
+      host: process.env.REDISIP,
       port: 6379,
       db: 2,
       ttl: 60 * 60 * 24 * 365
@@ -89,7 +89,7 @@ class App {
   }
  
   public listen() {
-    this.app.listen(4000, () => {
+    this.app.listen(process.env.PORT, () => {
       console.log(`App listening on the port ${process.env.PORT}`);
     })
   }
@@ -117,14 +117,14 @@ class App {
 
   //Connect to database
   private connectToTheDatabase() {
-    let dbURL = 'mongodb://localhost:27017/reduxtagram-server';
+    let dbURL = `mongodb://${process.env.MONGOIP}:27017/reduxtagram-server`;
     const { MONGODB_URL } = process.env
     mongoose.connect(dbURL, { useNewUrlParser: true}, function(err: any){
       if(err) {
-        console.log('Error connecting to: ', dbURL)
+        console.log('Error connecting...: ', dbURL)
       }
       else {
-        console.log('Connected to : ' + dbURL)
+        console.log('Connected to mongodb : ' + dbURL)
       }
     })
   }

@@ -21,6 +21,7 @@ class PostController {
   private initializeRouters() {
     this.router.get(`${this.path}`, this.fetchPosts)
     this.router.get(`${this.path}/:postId`, this.fetchSinglePost)
+    this.router.delete(`${this.path}/:postId`, this.removeSinglePost)
     this.router.get(`${this.path}/:postId/comments`, this.getCommentsForPost)
     this.router.post(`${this.path}/:postId/comments`, this.saveCommentForPost)
     this.router.delete(`${this.path}/:postId/comments`, this.removeCommentForPost)
@@ -30,7 +31,14 @@ class PostController {
   private fetchPosts = async (req: any, res: express.Response, next: express.NextFunction) => {
   try {
     if(req.session.user) {
+        const email = req.session.user.email;
+
+        const user = await dbOperations.fetchUserByEmail(email);
+        // need to fix this query- need to get posts of a particular email. Right now, I'll not pass anything since
+        // I'm using dummy data which doesn't have email property at this poing. 
+
         const posts = await dbOperations.getPosts();
+
         const comments = await dbOperations.fetchCommentsForPost(ObjectId("5d728e52cd08f069943317f5"))
         
         const postsInfoPromises = posts.map((post: Post) => {
@@ -160,37 +168,6 @@ class PostController {
           res.status(200).json({
             comments: fetchComments
           })
-        
-          
-          // if(fetchComments) {
-          //     const commentsInfo = await dbOperations.saveComment(postId, comment, user.username)
-          //     console.log(commentsInfo)
-
-          //     res.status(200).json({
-          //       // comments: commentsInfo.comments
-          //       comments: commentsInfo
-          //     });
-          
-          // }
-          // else {
-          //   const commentsInfo = new Comment({
-          //     postId: postId,
-          //     // comments: [{
-          //     //   text: comment,
-          //     //   username: user.username
-          //     // }]
-          //     text: comment,
-          //     username: user.username
-          //   });
-
-          //   commentsInfo.save().then(() => {
-          //     res.status(200).json({
-          //       comment: commentsInfo
-          //     })
-          //   }).catch((err: any) => {
-          //     console.log(err)
-          //   })
-          // }
           
         }
       }else {
@@ -206,13 +183,11 @@ class PostController {
     try {
       if(req.session.user) {
         const postId = req.params.postId;
+        const email = req.session.user.email;
+        const commentId = req.body.commentId;
+        const user = await dbOperations.fetchUserByEmail(email);
 
-        if(ObjectId.isValid(postId)){ 
-          const email = req.session.user.email;
-          const commentId = req.body.commentId;
-
-          const user = await dbOperations.fetchUserByEmail(email);
-
+        if(ObjectId.isValid(postId) && user){ 
           const commentToRemove = await dbOperations.removeComment(commentId)
           const fetchComments = await dbOperations.fetchCommentsForPost(postId);
           console.log("commentToRemove is ", commentToRemove)
@@ -220,6 +195,39 @@ class PostController {
           
           res.status(200).json({
             comments: fetchComments
+          })
+        }
+      }else {
+        next(new NotAuthorizedException())
+      }
+    }catch(e){
+        next(e)
+    }
+
+  }
+
+  private removeSinglePost = async (req: any, res: express.Response, next: express.NextFunction) => {
+
+    try {
+      if(req.session.user) {
+        const postId = req.params.postId;
+        const email = req.session.user.email;
+
+        const user = await dbOperations.fetchUserByEmail(email);
+
+        if(ObjectId.isValid(postId) && user){ 
+
+          const postToRemove = await dbOperations.removePost(postId)
+          const commentsToRemove = await dbOperations.removeAllComments(postId);
+
+          const postsToDisplay = await dbOperations.getPosts();
+          
+          console.log("postToRemove ", postToRemove)
+          console.log("commentToRemove is ", commentsToRemove)
+          
+          
+          res.status(200).json({
+            posts: postsToDisplay
           })
         }
       }else {

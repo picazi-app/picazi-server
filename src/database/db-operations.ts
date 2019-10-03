@@ -44,7 +44,7 @@ exports.incrementLikes = function(postId: string, likes: number) {
   .catch((err: any) => console.log("err occured inside in INCREEMENT_LIKES ", err) )
 }
 
-exports.getPosts = function() {
+exports.getPosts = function(email: string) {
   return Post.find({})
   .exec()
   .catch((err: any) => console.log("err occured in fetchUserByEmail", err))
@@ -71,18 +71,38 @@ exports.saveComment = function(postId: string, comment: string, username: string
     username: username
   })
   return comments.save()
-  .catch((err: any) => console.log("err occured inside in saveComment operation ", err) )
+  .catch((err: any) => console.log("err occured inside saveComment operation ", err) )
 }
 
-exports.removeComment = function(id: string) {
-  console.log("id", id);
+exports.removeComment = function(_id: string) {
+  console.log("id", _id);
   return Comment.deleteOne({
-    _id: id
+    _id: _id
   })
-  .catch((err: any) => console.log("err occured inside in removeComment", err))
-
+  .catch((err: any) => console.log("err occured inside removeComment", err))
 }
 
+exports.removeAllComments = function(postId: string) {
+  console.log("id", postId);
+  return Comment.deleteMany({
+    postId: postId
+  })
+  .catch((err: any) => console.log("err occured inside removeComment", err))
+}
+exports.removePost = function(postId: string) {
+  console.log("post to delete", postId);
+  return Post.deleteOne({
+    _id: postId
+  })
+  .catch((err: any) => console.log("err occured inside removePost", err))
+}
+
+exports.fetchPostsWhereDeletedIsFalse = function() {
+  return Post.find({
+    delete: false
+  })
+  .catch((err: any) => console.log("err occured inside removePost", err))
+}
 // exports.saveComment = function(postId: string, comment: string, username: string) {
   //   console.log(postId, comment, username);
   //   return Comment.findOneAndUpdate(

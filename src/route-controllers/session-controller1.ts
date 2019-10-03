@@ -21,7 +21,6 @@ class SessionController {
     return { firstName: user.firstName, username: user.username, email: user.email};
   }
   private loginUser = async (req: any, res: express.Response, next: express.NextFunction) => {
-    // console.log("loginUser.........", req.body.email)
     const email = req.body.email;
     const password = req.body.password;
   
