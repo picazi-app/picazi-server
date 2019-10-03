@@ -1,4 +1,6 @@
 node_modules/
 
 .env
-config.ts
+/src/config.ts
+lib
+data

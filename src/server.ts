@@ -13,3 +13,16 @@ const app = new App([
 ])
 
 app.listen();
+
+//  "build": "tsc -p .",
+// "build:live": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts"
+
+// "clean": "rimraf dist",
+// "start": "npm-run-all clean --parallel watch:build watch:server --print-label",
+// "watch:build": "tsc --watch",
+// "watch:server": "nodemon './dist/server.js' --watch './dist'",
+// "tsc": "tsc"
+// "build:live": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts --watch ./lib"
+
+// docker ke liye
+// "build:live": "nodemon './lib/server.js' --watch './dist'"

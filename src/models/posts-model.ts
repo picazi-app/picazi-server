@@ -2,6 +2,7 @@
 // const mongoose = require('mongoose');
 // const Schema = mongoose.Schema;
 import * as mongoose from 'mongoose';
+import mongoose_delete from 'mongoose-delete';
 import Post from '../interfaces/post.interface'
 /**
  *  User's Schema.
@@ -16,5 +17,7 @@ import Post from '../interfaces/post.interface'
   display_src: { type: String, required: true },
   createdAt: { type: Date, default: Date.now, required: true},
  })
+
+//  postSchema.plugin(mongoose_delete, { deletedAt : true });
 
  module.exports = mongoose.model<Post & mongoose.Document>('Post', postSchema);

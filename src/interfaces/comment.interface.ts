@@ -1,11 +1,8 @@
-interface Comments {
-  postId: number;
-  comments: SingleComment[];
-}
 
-interface SingleComment {
+interface Comment {
   text: string;
-  user: string; 
+  username: string; 
+  postId: string;
 }
 
-export default Comments
+export default Comment
