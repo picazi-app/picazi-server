@@ -4,7 +4,6 @@ services:
     container_name: reduxtagram-server-container
     image: reduxtagram-server-image
     restart: always
-    build: .
     ports:
       - "4000:4000"
     environment:
@@ -18,7 +17,6 @@ services:
     container_name: my-reduxtagram-container
     image: my-reduxtagram-image
     restart: always
-    build: .
     ports:
       - "3000:3000"
 
