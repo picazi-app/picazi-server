@@ -1,9 +1,7 @@
-// export {};
-// const mongoose = require('mongoose');
-// const Schema = mongoose.Schema;
 import * as mongoose from 'mongoose';
 import mongoose_delete from 'mongoose-delete';
 import Post from '../interfaces/post.interface'
+
 /**
  *  User's Schema.
  *

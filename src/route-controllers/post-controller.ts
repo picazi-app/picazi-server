@@ -33,13 +33,7 @@ class PostController {
     if(req.session.user) {
         const email = req.session.user.email;
 
-        const user = await dbOperations.fetchUserByEmail(email);
-        // need to fix this query- need to get posts of a particular email. Right now, I'll not pass anything since
-        // I'm using dummy data which doesn't have email property at this poing. 
-
         const posts = await dbOperations.getPosts();
-
-        const comments = await dbOperations.fetchCommentsForPost(ObjectId("5d728e52cd08f069943317f5"))
         
         const postsInfoPromises = posts.map((post: Post) => {
           return dbOperations.fetchCommentsForPost(post._id)
@@ -61,7 +55,6 @@ class PostController {
         
         Promise.all(postsInfoPromises).then((results) => {
           if(results === null) {
-            // res.status(200).send('Posts are empty')
             res.status(200).json({ posts: [] })
           }
           else {
@@ -78,8 +71,6 @@ class PostController {
     }
     catch(e) {
       console.log(e);
-      // throw new Error('Inside catch block. not sure what happening');
-      // res.status(500).send({msg: 'Server Error.'})
       next(e)
     };
   }
@@ -162,7 +153,7 @@ class PostController {
 
           const commentToSave = await dbOperations.saveComment(postId, comment, user.username);
           const fetchComments = await dbOperations.fetchCommentsForPost(postId);
-          console.log(fetchComments)
+          // console.log(fetchComments)
       
           
           res.status(200).json({

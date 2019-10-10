@@ -1,5 +1,7 @@
 import * as express from 'express';
 import InvalidCredentialsException from '../exceptions/InvalidCredentialsException';
+import {Session, SessionUser} from '../interfaces/session-interface'
+import { Request } from 'aws-sdk';
 const dbOperations = require('../database/db-operations');
 const bcrypt = require('bcrypt');
 
@@ -17,7 +19,7 @@ class SessionController {
     this.router.delete(`${this.path}/delete`, this.deleteUserSession);
   }
 
-  private sessionizeUser = (user:any) => {
+  private sessionizeUser = (user:SessionUser) => {
     return { firstName: user.firstName, username: user.username, email: user.email};
   }
   private loginUser = async (req: any, res: express.Response, next: express.NextFunction) => {
@@ -27,9 +29,7 @@ class SessionController {
   const user = await dbOperations.fetchUserByEmail(email);
   try {
     if(user) {
-      // console.log("login user", user) 
       const match = await bcrypt.compare(password, user.password);
-      // console.log("match is", match)
       if(match) {
         req.session.user = {
           email: email,
@@ -44,42 +44,25 @@ class SessionController {
         });
       }
       else {
-        // res.status(401).send({
-        //   error: {
-        //     code: "INVALID_CREDENTIALS",
-        //     msg: "Password is incorrect"
-        //   }
-        // });
           next(new InvalidCredentialsException())
       }
     } 
     else {
-      // res.status(401).send({
-      //   error: {
-      //     code: "INVALID_CREDENTIALS",
-      //     msg: "Email/password is incorrect"
-      //   }
-      // });
         next(new InvalidCredentialsException())
     }
   } catch(e) {
       console.log("error inside login catch")
-      // res.status(500).send({
-      //   error: {
-      //     code: "INVALID_CREDENTIALS",
-      //     msg: "Server error."
-      //   }
-      // });
       next(e)
       
     }
     
   }
 
-  private getUserSession = ({ session: {user}}:any, res: express.Response) => {
-    console.log("inside session get")
+  private getUserSession = (req: express.Request, res: express.Response) => {
+    console.log("req.session is.....", req.session)
+    const user = req!.session!.user
     try{
-      if(user) {
+      if(req!.session! && user) {
         res.status(200).send({
           user: {
             ...user
@@ -100,17 +83,15 @@ class SessionController {
     
   }
 
-  private deleteUserSession = ({ session }: any, res: express.Response) => {
+  private deleteUserSession = ({ session }:any, res: express.Response) => {
     try {
-      const user = session.user;
-      console.log("API/SESSION DELETE user", user)
+      const user = session && session.user;
       if(user) {
         session.destroy((err:any) => {
           if(err) throw err;
           res.clearCookie('purnima')
           res.send(user);
         })
-      console.log("After DELETing user", user)
       }
       else {
         throw new Error('ERROR: You are logged out')

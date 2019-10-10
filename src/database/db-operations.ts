@@ -1,6 +1,3 @@
-import comments from "./sample-comments";
-
-export {};
 const User = require('../models/user-model');
 const Post = require('../models/posts-model');
 const Comment = require('../models/comment-model');
@@ -45,7 +42,7 @@ exports.incrementLikes = function(postId: string, likes: number) {
 }
 
 exports.getPosts = function(email: string) {
-  return Post.find({})
+  return Post.find({}).sort({ createdAt: -1})
   .exec()
   .catch((err: any) => console.log("err occured in fetchUserByEmail", err))
 }
@@ -103,47 +100,3 @@ exports.fetchPostsWhereDeletedIsFalse = function() {
   })
   .catch((err: any) => console.log("err occured inside removePost", err))
 }
-// exports.saveComment = function(postId: string, comment: string, username: string) {
-  //   console.log(postId, comment, username);
-  //   return Comment.findOneAndUpdate(
-  //     {postId: ObjectId(postId)},
-  //     {
-  //       $push: { 
-  //          comments: { 
-  //           text: comment,
-  //           username: username
-  //          }
-  //       }
-  //     },  
-  //     {new: true},
-  //   )
-  //   .exec()
-  //   .catch((err: any) => console.log("err occured inside in saveComment operation ", err) )
-  // }
-  // Fetch Posts
-//OLD Schema values 
-
-// {
-// 	"_id" : ObjectId("5d8680ad41cb627c17d0f557"),
-// 	"postId" : ObjectId("5d728e52cd08f069943317f5"),
-// 	"comments" : [
-// 		{
-// 			"text" : "llllllllll",
-// 			"username" : "puri"
-// 		},
-// 		{
-// 			"text" : "lllllllllllll",
-// 			"username" : "puri"
-// 		},
-// 		{
-// 			"text" : "lllllllllllllllllllllllllllllllllllllllllllllllll",
-// 			"username" : "puri"
-// 		},
-// 		{
-// 			"text" : "purnima",
-// 			"username" : "puri"
-// 		}
-// 	],
-// 	"createdAt" : ISODate("2019-09-21T19:57:33.411Z"),
-// 	"__v" : 0
-// }

@@ -33,9 +33,6 @@ class PhotoController {
               return res.status(422).send({errors: [{title: 'File Upload Error', detail: err.message}] });
             } 
             else {
-              // no error   
-              // const post = new Post({ _id: { type: Schema.ObjectId, auto: true }});
-              // console.log(post);
               if(req.file === undefined) {
                 res.json({ error: 'No file selected'})
               } 
@@ -46,9 +43,6 @@ class PhotoController {
                   likes: 0,
                   caption: ""  
                 });
-                console.log("req.file.image", req.file.image)
-                console.log("req.file.location",req.file.location)
-                console.log("Post data after creating Post object ", post1)
                 post1.save((err: any) => {
                   if(err) {
                     console.log(err);
@@ -57,16 +51,7 @@ class PhotoController {
                   res.status(200).json({ data: 'Post data saved successfully', imageUrl: req.file.location })
                 })
               }
-              // post.save()
-              //   .then((postData: Post) => {
-              //     res.status(200).json({ data: 'Post data saved successfully', imageUrl: req.file.location })
-              //   })
-              //   .catch(() => {
-              //     res.status(400).json({
-              //       error: "coundn't save the data"
-              //     })
-              //   })
-              // return res.json({'imageUrl': req.file.location});
+             
             }
           })
         }
