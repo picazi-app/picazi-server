@@ -38,7 +38,7 @@ class App {
       allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"],
       credentials: true,
       methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
-      origin: "https://desolate-stream-98688.herokuapp.com/",
+      origin: "https://infinite-escarpment-65875.herokuapp.com/",
       preflightContinue: false
     };
 
