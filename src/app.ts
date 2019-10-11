@@ -131,14 +131,13 @@ class App {
 
   //Connect to database
   private connectToTheDatabase() {
-    let mongodb_url =process.env.NODE_ENV === "production" ? process.env.MONGOIP : `mongodb://${process.env.MONGOIP}:27017/reduxtagram-server`
-    console.log(mongodb_url)
+    const mongodb_url = process.env.MONGODB_URL || 'mongodb://localhost:27017/reduxtagram-server'
     mongoose.connect(mongodb_url, { useNewUrlParser: true}, function(err: any){
       if(err) {
-        console.log('Error connecting..database ')
+        console.log(`Error connecting to database: ${err}`)
       }
       else {
-        console.log('Connected to mongodb')
+        console.log(`Connected to mongodb: ${mongodb_url}`)
       }
     })
   }

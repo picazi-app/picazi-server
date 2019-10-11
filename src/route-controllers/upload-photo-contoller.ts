@@ -4,6 +4,7 @@ import Post from '../interfaces/post.interface'
 const Post = require('../models/posts-model');
 const upload = require('../services/upload-photo-aws');
 import NotAuthorizedException from '../exceptions/NotAuthorizedException';
+import FileUploadException from '../exceptions/FileUploadException';
 const ObjectId = require('mongoose').Types.ObjectId; 
 const singleUpload = upload.single('imageData');
 
@@ -30,7 +31,7 @@ class PhotoController {
         if(user) {
           singleUpload(req, res, function(err: any) {
             if (err) {
-              return res.status(422).send({errors: [{title: 'File Upload Error', detail: err.message}] });
+              return next(new FileUploadException(err.message))
             } 
             else {
               if(req.file === undefined) {
@@ -53,15 +54,18 @@ class PhotoController {
               }
              
             }
-          })
+          });
+
+        } else {
+          next(new NotAuthorizedException());
         }
-      }
-       else {
-          next(new NotAuthorizedException())
+
+      } else {
+        next(new NotAuthorizedException());
       }
     }
     catch(exception) {
-      console.log("upload photo exception")
+      console.log("upload photo exception");
     }
   }
 }
