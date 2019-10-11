@@ -64,41 +64,65 @@ class App {
     // this.app.use(express.static(path.join(__dirname, '../client/build')));
     
     if(process.env.NODE_ENV === 'production') {
-      console.log("process.env.NODE_ENV", process.env.NODE_ENV);
-      console.log("process.env.REDISTOGO_URL", process.env.REDISTOGO_URL);
-
+      this.app.set('trust proxy', 1) 
       const rtg   = url.parse(process.env.REDISTOGO_URL);
 
       console.log("rtg is", rtg)
+
       const redisClient = redis.createClient(rtg.port, rtg.hostname);
 
+      redisClient.on('error', console.error)
+
       redisClient.auth(rtg.auth.split(":")[1]);
+
+      console.log("rtg.port is ", rtg.port)
+      console.log("rtg.hostname is", rtg.hostname);
+      console.log("rtg.auth is ", rtg.auth)
+      console.log("redisClient is now..", redisClient)
       
-      sessionStore = new RedisStore({
-        redisClient
-      })
+      
+      // sessionStore = new RedisStore({
+      //   redisClient
+      // })
+      this.app.use(session({
+        name: 'purnima',
+        store: new RedisStore({
+            redisClient
+        }),
+        secret: 'meow',
+        resave: true,
+        saveUninitialized: false,
+        cookie: {
+          secure: false,
+          sameSite: false,
+          maxAge: 36000000,
+          httpOnly: false,
+          domain: "https://desolate-stream-98688.herokuapp.com"
+        }
+      }));
     }
     else { 
       const redisClient = redis.createClient();
       sessionStore = new RedisStore({ 
         redisClient
        })
+       this.app.use(session({
+         name: 'purnima',
+         store: sessionStore,
+         secret: 'meow',
+         resave: false,
+         saveUninitialized: false,
+         cookie: {
+           secure: false,
+           sameSite: false,
+           maxAge: 36000000,
+           httpOnly: false,
+           // domain: "https://desolate-stream-98688.herokuapp.com/"
+         }
+       }));
+      
     }
     
-    this.app.use(session({
-      name: 'purnima',
-      store: sessionStore,
-      secret: 'meow',
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure:  process.env.NODE_ENV === 'production' ? true : false,
-        sameSite: false,
-        maxAge: 36000000,
-        httpOnly: false,
-        domain: process.env.NODE_ENV === 'production' ? "https://reduxtagram-client.herokuapp.com/" : "http://localhost:3000"
-      }
-    }));
 
   }
  
