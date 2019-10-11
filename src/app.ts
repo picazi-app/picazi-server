@@ -38,7 +38,7 @@ class App {
       allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"],
       credentials: true,
       methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
-      origin: "https://infinite-escarpment-65875.herokuapp.com/",
+      origin: "https://reduxtagram-client.herokuapp.com",
       preflightContinue: false
     };
 
@@ -64,7 +64,12 @@ class App {
     // this.app.use(express.static(path.join(__dirname, '../client/build')));
     
     if(process.env.NODE_ENV === 'production') {
+      console.log("process.env.NODE_ENV", process.env.NODE_ENV);
+      console.log("process.env.REDISTOGO_URL", process.env.REDISTOGO_URL);
+
       const rtg   = url.parse(process.env.REDISTOGO_URL);
+
+      console.log("rtg is", rtg)
       const redisClient = redis.createClient(rtg.port, rtg.hostname);
 
       redisClient.auth(rtg.auth.split(":")[1]);
@@ -87,11 +92,11 @@ class App {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure:  process.env.NODE_ENV === 'production'? true:false,
-        sameSite: process.env.NODE_ENV === 'production'? true:false,
+        secure:  process.env.NODE_ENV === 'production' ? true : false,
+        sameSite: false,
         maxAge: 36000000,
         httpOnly: false,
-        // domain: "https://desolate-stream-98688.herokuapp.com/"
+        domain: process.env.NODE_ENV === 'production' ? "https://reduxtagram-client.herokuapp.com/" : "http://localhost:3000"
       }
     }));
 
