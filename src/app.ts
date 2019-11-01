@@ -60,35 +60,23 @@ class App {
     this.app.use(logger('dev'));
     this.app.use(cookieParser());
     
-    // Serve static files from the React app
-    // this.app.use(express.static(path.join(__dirname, '../client/build')));
-    
     if(process.env.NODE_ENV === 'production') {
       this.app.set('trust proxy', 1) 
-      const rtg   = url.parse(process.env.REDISTOGO_URL);
 
-      console.log("rtg is", rtg)
+      // const rtg   = url.parse(process.env.REDISTOGO_URL);
 
-      const redisClient = redis.createClient(rtg.port, rtg.hostname);
+      // const redisClient = redis.createClient(rtg.port, rtg.hostname);
+      var client = require('redis').createClient(process.env.REDIS_URL);
 
-      redisClient.on('error', console.error)
+      // redisClient.on('error', console.error)
 
-      redisClient.auth(rtg.auth.split(":")[1]);
-
-      console.log("rtg.port is ", rtg.port)
-      console.log("rtg.hostname is", rtg.hostname);
-      console.log("rtg.auth is ", rtg.auth)
-      console.log("redisClient is now..", redisClient)
-      
-      
-      // sessionStore = new RedisStore({
+      // redisClient.auth(rtg.auth.split(":")[1]);
+      // store: new RedisStore({
       //   redisClient
-      // })
+      // }),
       this.app.use(session({
         name: 'purnima',
-        store: new RedisStore({
-            redisClient
-        }),
+        store: client,
         secret: 'meow',
         resave: true,
         saveUninitialized: false,
@@ -117,10 +105,8 @@ class App {
            sameSite: false,
            maxAge: 36000000,
            httpOnly: false,
-           // domain: "https://desolate-stream-98688.herokuapp.com/"
          }
        }));
-      
     }
     
 
@@ -138,11 +124,7 @@ class App {
       this.app.use('/', controller.router)
     })
   }
-  private acceptAllRoutes() {
-    this.app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname+'../client/build/index.html'));
-    });
-  }
+
   private initializeErrorHandling() {
     this.app.use(function(error:HttpException, req: Request, res: Response, next: NextFunction) {
 
