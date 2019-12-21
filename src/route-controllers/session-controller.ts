@@ -59,10 +59,10 @@ class SessionController {
   }
 
   private getUserSession = ({ session }:any, res: express.Response) => {
-    console.log("req.session is.....", session)
+    // console.log("req.session is.....", session)
     // const user = req!.session!.user
     // if(req!.session! && user)
-    console.log("user is", session.user);
+    // console.log("user is", session.user);
     try{
       if(session && session.user) {
         res.status(200).send({
