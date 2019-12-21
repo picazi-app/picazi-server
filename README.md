@@ -41,11 +41,21 @@ In order to run the app in browser, you would first require to install NodeJS, M
 Next, install reduxgram-server and reduxtagram-client.
 
 #### Reduxtagram-server
-- `git clobe git@github.com:personal-pooya/reduxtagram-server.git`
+- `git clone git@github.com:personal-pooya/reduxtagram-server.git`
+- Create `.env` file at the root level and provide values for AWS credentials like below and Port number
+  ```
+  PORT = 4000
+  AWS_ACCESS_KEYID = ''
+  AWS_SECRET_ACCESS_KEY = ''
+  BUCKET = ''
+  REGION = ''
+  ```
 - Run `npm install`
 - Run `npm start`
 
 Server will get started on port 4000.
+
+**Note**: If you forget to create `.env` file for AWS credentials, you're going to get error `bucket is required`
 
 #### Reduxtagram-client
 - `git clone git@github.com:personal-pooya/reduxtagram-client.git`
