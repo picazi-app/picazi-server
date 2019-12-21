@@ -31,10 +31,18 @@ class PostController {
   private fetchPosts = async (req: any, res: express.Response, next: express.NextFunction) => {
   try {
     if(req.session.user) {
-        const email = req.session.user.email;
+      console.log(req.query.page)
+      const page = parseInt(req.query.page);
 
-        const posts = await dbOperations.getPosts();
-        
+      const limit = 10;
+      const posts = await dbOperations.getPosts(page, limit);
+      const postsCount = await dbOperations.getPostsCount();
+
+      const totalPages = Math.ceil(postsCount/limit);
+
+
+        console.log(postsCount)
+      
         const postsInfoPromises = posts.map((post: Post) => {
           return dbOperations.fetchCommentsForPost(post._id)
           .then((results: any)=> {
@@ -58,7 +66,7 @@ class PostController {
             res.status(200).json({ posts: [] })
           }
           else {
-            res.status(200).json({posts: results})
+            res.status(200).json({posts: results, totalPages: totalPages})
           }
           
         }).catch(e => {

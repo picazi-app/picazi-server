@@ -12,7 +12,7 @@
     "tsc": "tsc",
     "watch:build": "tsc --watch",
     "watch:server": "nodemon --watch 'src/**/*.ts' --exec ./node_modules/.bin/ts-node src/server.ts",
-    "postinstall": "./node_modules/.bin/tsc ./tsconfig.json || echo done"
+    "postinstall": "./node_modules/.bin/tsc || echo done"
   },
   "dependencies": {
     "@types/aws-sdk": "^2.7.0",

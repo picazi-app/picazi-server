@@ -1,3 +1,5 @@
+import { link } from "fs";
+
 const User = require('../models/user-model');
 const Post = require('../models/posts-model');
 const Comment = require('../models/comment-model');
@@ -41,10 +43,17 @@ exports.incrementLikes = function(postId: string, likes: number) {
   .catch((err: any) => console.log("err occured inside in INCREEMENT_LIKES ", err) )
 }
 
-exports.getPosts = function(email: string) {
-  return Post.find({}).sort({ createdAt: -1})
+exports.getPostsCount= function() {
+  return Post.find({}).count()
   .exec()
-  .catch((err: any) => console.log("err occured in fetchUserByEmail", err))
+  .catch((err: any) => console.log("err occured in getPostsCount", err))
+}
+
+exports.getPosts = function(page: number, limit: number) {
+  const skip = page-1;
+  return Post.find({}).skip(skip*limit).limit(limit).sort({ createdAt: -1})
+  .exec()
+  .catch((err: any) => console.log("err occured in getPosts", err))
 }
 
 exports.fetchSinglePost = function(id: string) {

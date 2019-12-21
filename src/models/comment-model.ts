@@ -1,5 +1,5 @@
 // export {};
-  import * as mongoose from 'mongoose';
+import * as mongoose from 'mongoose';
 import Comment from '../interfaces/comment.interface';
 
 /**
