@@ -39,9 +39,6 @@ class PostController {
       const postsCount = await dbOperations.getPostsCount();
 
       const totalPages = Math.ceil(postsCount/limit);
-
-
-        console.log(postsCount)
       
         const postsInfoPromises = posts.map((post: Post) => {
           return dbOperations.fetchCommentsForPost(post._id)

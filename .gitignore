@@ -2,4 +2,3 @@ node_modules/
 /src/config.ts
 lib
 data
-.env
