@@ -1,8 +1,7 @@
-const Comment = require('../models/comment-model');
-const Post = require('../models/posts-model');
+const Comment = require('../../models/comment-model');
+const Post = require('../../models/posts-model');
 var mongoose = require('mongoose');
-import Post from '../interfaces/post.interface';
-import Comments from '../interfaces/comment.interface';
+import Comments from '../../interfaces/comment.interface';
 const samplePosts = require("./sample-posts");
 const sampleComments = require("./sample-comments");
 
