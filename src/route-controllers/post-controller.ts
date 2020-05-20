@@ -31,7 +31,6 @@ class PostController {
   private fetchPosts = async (req: any, res: express.Response, next: express.NextFunction) => {
   try {
     if(req.session.user) {
-      console.log(req.query.page)
       const page = parseInt(req.query.page);
 
       const limit = 10;
@@ -41,14 +40,17 @@ class PostController {
       const totalPages = Math.ceil(postsCount/limit);
       
         const postsInfoPromises = posts.map((post: Post) => {
-          return dbOperations.fetchCommentsForPost(post._id)
-          .then((results: any)=> {
+          return Promise.all([
+            dbOperations.fetchCommentsForPost(post._id), 
+            dbOperations.fetchLikesCountForPost(post._id)
+          ])
+          .then( ([comments, likes]) => {
             return {
               _id: post._id,
               caption: post.caption,
-              likes: post.likes,
+              likes: likes,
               display_src: post.display_src,
-              totalComments: results ? results.length : 0
+              totalComments: comments ? comments.length : 0
             }
           })
           .catch((err:any) => {
@@ -88,8 +90,9 @@ class PostController {
         else {
           const postPromise = dbOperations.fetchSinglePost(req.params.postId);
           const commentPromise = dbOperations.fetchCommentsForPost(req.params.postId);
+          const likePromise = dbOperations.fetchLikesCountForPost(req.params.postId)
       
-          const [post, commentsInfo] = await Promise.all([postPromise, commentPromise]);
+          const [post, commentsInfo, likes] = await Promise.all([postPromise, commentPromise, likePromise]);
           if(post === null) {
               next(new PostNotFoundException(req.params.postId))
 
@@ -98,7 +101,7 @@ class PostController {
             const postInfo = {
               _id: post._id,
               caption: post.caption,
-              likes: post.likes,
+              likes: likes,
               display_src: post.display_src,
               totalComments: commentsInfo ? commentsInfo.length : 0
             }
@@ -113,20 +116,6 @@ class PostController {
         // next(new PostNotFoundException(req.params.postId))
         next(e)
     };
-  }
-
-  private incrementLikes = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    if(ObjectId.isValid(req.params.postId)) {
-      const postId = req.body.postId;
-      const likes = req.body.likes;
-      const post = await dbOperations.incrementLikes(postId, likes)
-      if(post) {
-        res.json({ post: post})
-      }
-      else {
-        next(new PostNotFoundException(req.params.postId))
-      }
-    } 
   }
 
   private getCommentsForPost = async (req: express.Request, res: express.Response, next: NextFunction) => {
@@ -157,10 +146,8 @@ class PostController {
           const user = await dbOperations.fetchUserByEmail(email);
 
           const commentToSave = await dbOperations.saveComment(postId, comment, user.username);
-          const fetchComments = await dbOperations.fetchCommentsForPost(postId);
-          // console.log(fetchComments)
-      
-          
+          const fetchComments = await dbOperations.fetchCommentsForPost(postId);    
+    
           res.status(200).json({
             comments: fetchComments
           })
@@ -173,7 +160,40 @@ class PostController {
         next(e)
     }
   }
+  private incrementLikes = async(req: any, res: express.Response, next: NextFunction) => {
+    try {
+      if(req.session.user) {
+        const postId = req.params.postId;
 
+        if(ObjectId.isValid(postId)){ 
+          const email = req.session.user.email;
+          const likes = req.params.likes;
+
+          const hasLiked = await dbOperations.hasUserLiked(email, postId);
+
+          if(hasLiked) {
+            const deletedLikePost = await dbOperations.deleteLikedPostByUser(email, postId);
+            res.status(200).json({
+              _id: postId,
+              isLiked: false
+            })
+          } else {
+            const incrementLikePost = await dbOperations.incrementLikes(email, postId);
+            res.status(200).json({
+              _id: postId,
+              isLiked: true
+            })
+          }  
+
+          
+        }
+      }else {
+        next(new NotAuthorizedException())
+      }
+    }catch(e){
+        next(e)
+    }
+  }
   private removeCommentForPost = async (req: any, res: express.Response, next: express.NextFunction) => {
 
     try {
