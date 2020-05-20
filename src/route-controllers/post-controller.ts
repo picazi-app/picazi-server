@@ -5,7 +5,7 @@ import CommentInterface from '../interfaces/comment.interface';
 import PostNotFoundException from '../exceptions/PostNotFoundException';
 import NotAuthorizedException from '../exceptions/NotAuthorizedException';
 import { NextFunction } from 'connect';
-import comments from '../database/sample-comments';
+import HttpException from '../exceptions/HttpException';
 const Comment = require('../models/comment-model');
 
 var ObjectId = require('mongodb').ObjectID
@@ -212,23 +212,26 @@ class PostController {
         const user = await dbOperations.fetchUserByEmail(email);
 
         if(ObjectId.isValid(postId) && user){ 
-
-          const postToRemove = await dbOperations.removePost(postId)
-          const commentsToRemove = await dbOperations.removeAllComments(postId);
-
-          const postsToDisplay = await dbOperations.getPosts();
-          
-          console.log("postToRemove ", postToRemove)
-          console.log("commentToRemove is ", commentsToRemove)
-          
-          
-          res.status(200).json({
-            posts: postsToDisplay
-          })
+          Promise.all([
+            dbOperations.removePost(postId),
+            dbOperations.removeAllComments(postId)
+          ]).then( ([deletedPost, deletedComment]) => {
+            if (deletedPost && deletedComment) {
+              res.status(200).json({
+                postId,
+              });
+            } else {
+              next(new HttpException(500, "Some error occurred while trying to remove post / comment"));
+            }
+          });
+        } else {
+          next(new PostNotFoundException(postId));
         }
+
       }else {
         next(new NotAuthorizedException())
       }
+
     }catch(e){
         next(e)
     }
