@@ -7,8 +7,10 @@
     "npm": "6.4.1"
   },
   "scripts": {
-    "clean": "rimraf ./lib/",
-    "start": "npm-run-all clean --parallel watch:server --print-label",
+    "start-dev": "npm-run-all clean --parallel watch:server --print-label",
+    "start":"npm run build && node build/server.js",
+    "build": "rimraf ./build && tsc",
+    "clean": "rimraf ./build/",
     "tsc": "tsc",
     "watch:build": "tsc --watch",
     "watch:server": "nodemon --watch 'src/**/*.ts' --exec ./node_modules/.bin/ts-node src/server.ts",
