@@ -1,5 +1,3 @@
-// export {};
-// const mongoose = require('mongoose');
 import * as mongoose from 'mongoose';
 import User from '../interfaces/user.interface';
 /**
@@ -15,9 +13,4 @@ import User from '../interfaces/user.interface';
    firstName: { type: String }
  })
 
- module.exports = mongoose.model<User & mongoose.Document>('User', userSchema);
-
-//  module.exports.User = User;
-
-// "start": "node ./bin/www",
-//     "devstart": "nodemon ./bin/www"
+module.exports = mongoose.model<User & mongoose.Document>('User', userSchema);

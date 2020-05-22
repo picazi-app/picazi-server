@@ -11,21 +11,3 @@ class HttpException extends Error {
 }
 
 export default HttpException;
-
-// //TODO: convert to functional class
-// class AppError extends Error {
-//   constructor(message) {
-//       super();
-//       // Maintains proper stack trace for where our error was thrown (only available on V8)
-//       if (Error.captureStackTrace) {
-//           Error.captureStackTrace(this, this.constructor);
-//       }
-//       this.error = true;
-//       this.name = this.constructor.name;
-//       this.message = message;
-//       this.code = 'application/unknown-error';
-//   }
-// }
-
-
-// module.exports = AppError

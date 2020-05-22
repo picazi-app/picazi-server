@@ -1,6 +1,5 @@
 import * as express from 'express';
 const dbOperations = require('../database/db-operations');
-import Post from '../interfaces/post.interface'
 const Post = require('../models/posts-model');
 const upload = require('../services/upload-photo-aws');
 import NotAuthorizedException from '../exceptions/NotAuthorizedException';
