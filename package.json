@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start-dev": "npm-run-all clean --parallel watch:server --print-label",
-    "start":"npm run build && node build/server.js",
+    "start": "npm run build && node build/server.js",
     "build": "rimraf ./build && tsc",
     "clean": "rimraf ./build/",
     "tsc": "tsc",
