@@ -26,7 +26,7 @@ app is inspired from wesbos redux course.
 - aws-sdk & multer-s3
 
 
-#### Clound services
+#### Cloud services
 - Hosting - AWS
 - Storing images - AWS S3
 
